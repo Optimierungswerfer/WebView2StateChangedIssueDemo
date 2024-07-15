@@ -200,6 +200,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ViewTree.h" />
+    <ClInclude Include="WebView2Ctrl.h" />
     <ClInclude Include="WebView2DownloadOperationStateChangedIssueRepro.h" />
     <ClInclude Include="WebView2DownloadOperationStateChangedIssueReproDoc.h" />
     <ClInclude Include="WebView2DownloadOperationStateChangedIssueReproView.h" />
@@ -218,6 +219,7 @@
     </ClCompile>
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="ViewTree.cpp" />
+    <ClCompile Include="WebView2Ctrl.cpp" />
     <ClCompile Include="WebView2DownloadOperationStateChangedIssueRepro.cpp" />
     <ClCompile Include="WebView2DownloadOperationStateChangedIssueReproDoc.cpp" />
     <ClCompile Include="WebView2DownloadOperationStateChangedIssueReproView.cpp" />

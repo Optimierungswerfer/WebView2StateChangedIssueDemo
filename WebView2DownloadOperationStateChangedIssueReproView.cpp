@@ -29,6 +29,8 @@ BEGIN_MESSAGE_MAP(CWebView2DownloadOperationStateChangedIssueReproView, CView)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CWebView2DownloadOperationStateChangedIssueReproView::OnFilePrintPreview)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+  ON_WM_SIZE()
+  ON_WM_SETFOCUS()
 END_MESSAGE_MAP()
 
 // CWebView2DownloadOperationStateChangedIssueReproView construction/destruction
@@ -125,4 +127,53 @@ CWebView2DownloadOperationStateChangedIssueReproDoc* CWebView2DownloadOperationS
 #endif //_DEBUG
 
 
+void CWebView2DownloadOperationStateChangedIssueReproView::OnInitialUpdate()
+{
+  CreateWebView2Ctrl();
+
+  __super::OnInitialUpdate();
+}
+
 // CWebView2DownloadOperationStateChangedIssueReproView message handlers
+
+void CWebView2DownloadOperationStateChangedIssueReproView::OnSize(UINT nType, int cx, int cy)
+{
+  __super::OnSize(nType, cx, cy);
+
+  if (m_pWebView2Ctrl && m_pWebView2Ctrl->GetSafeHwnd())
+  {
+    m_pWebView2Ctrl->Resize(cx, cy);
+  }
+}
+
+void CWebView2DownloadOperationStateChangedIssueReproView::OnSetFocus(CWnd* pOldWnd)
+{
+  if (m_pWebView2Ctrl)
+  {
+    if (IsTopParentActive())
+    {
+      m_pWebView2Ctrl->SetFocus();
+      return; //handled!
+    }
+  }
+  __super::OnSetFocus(pOldWnd);
+}
+
+void CWebView2DownloadOperationStateChangedIssueReproView::CreateWebView2Ctrl()
+{
+  CRect rectClient;
+  GetClientRect(rectClient);
+  m_pWebView2Ctrl = std::make_unique<CWebView2Ctrl>();
+  m_pWebView2Ctrl->CreateAsync(WS_VISIBLE | WS_CHILD, rectClient, this, IDC_WEBVIEW2, [this]() { OnWebView2CtrlCreated(); });
+}
+
+void CWebView2DownloadOperationStateChangedIssueReproView::OnWebView2CtrlCreated()
+{
+  if (!m_pWebView2Ctrl)
+  {
+    ASSERT(false);
+    return;
+  }
+
+  m_pWebView2Ctrl->Navigate(L"https://ash-speed.hetzner.com/");
+}

@@ -13,6 +13,8 @@
 #include "WebView2DownloadOperationStateChangedIssueReproDoc.h"
 #include "WebView2DownloadOperationStateChangedIssueReproView.h"
 
+#include "winrt/base.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -76,6 +78,8 @@ BOOL CWebView2DownloadOperationStateChangedIssueReproApp::InitInstance()
 
 	CWinAppEx::InitInstance();
 
+  // Initializes WinRT using a single-threaded apartment
+  winrt::init_apartment(winrt::apartment_type::single_threaded);
 
 	// Initialize OLE libraries
 	if (!AfxOleInit())
