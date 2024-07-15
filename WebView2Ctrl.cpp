@@ -43,6 +43,8 @@ namespace Internal
     strErrorMessage.Format(L"Internal Error!\n\nAn unexpected error occurred in the WebView2 control (error code 0x%08X).\n\n%s", hr.code().operator INT32(), hr.message().c_str());
     AfxMessageBox(strErrorMessage.operator LPCWSTR(), MB_OK | MB_ICONERROR);
   }
+
+  std::list<CoreWebView2DownloadOperation> g_DownloadOperationHandles{}; // Needed to keep alive at least one handle per download operation in order for the StateChanged event to work.
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -161,6 +163,9 @@ winrt::fire_and_forget CWebView2Ctrl::CreateWebView2ControllerAsync()
       ASSERT(m_pWebViewImpl == nullptr); // Must be nullptr, otherwise someone called Create multiple times, which must never happen, because that would overwrite the existing WebView2 with a new instance without cleaning up the old one.
       m_pWebViewImpl = new CWebView2CtrlImpl{ webControllerTask.GetResults() };
 
+      RegisterDownloadOperationStateChangedEventHandler_BROKEN();
+      RegisterDownloadOperationStateChangedEventHandler_WORKING();
+
       ResizeToClientArea();
 
       if (m_cbOnCreated)
@@ -173,6 +178,45 @@ winrt::fire_and_forget CWebView2Ctrl::CreateWebView2ControllerAsync()
   {
     Internal::ShowFailure(hr);
   }
+}
+
+void CWebView2Ctrl::RegisterDownloadOperationStateChangedEventHandler_BROKEN()
+{
+  if (!m_pWebViewImpl)
+  {
+    ASSERT(false);
+    return;
+  }
+
+  m_pWebViewImpl->m_webView2.DownloadStarting(
+    [](auto&&, const CoreWebView2DownloadStartingEventArgs& args)
+    {
+      TRACE(_T("\n[Info] DownloadStarting! Registering broken StateChanged event handler...\n"));
+      const CoreWebView2DownloadOperation& downloadOperation{ args.DownloadOperation() };
+      downloadOperation.StateChanged([](auto&&, auto&&) {
+        TRACE(_T("\n[Info] Broken StateChanged event handler was called!\n")); // Does not get executed!
+      });
+    });
+}
+
+void CWebView2Ctrl::RegisterDownloadOperationStateChangedEventHandler_WORKING()
+{
+  if (!m_pWebViewImpl)
+  {
+    ASSERT(false);
+    return;
+  }
+
+  m_pWebViewImpl->m_webView2.DownloadStarting(
+    [](auto&&, const CoreWebView2DownloadStartingEventArgs& args)
+    {
+      TRACE(_T("\n[Info] DownloadStarting! Registering working StateChanged event handler...\n"));
+      const CoreWebView2DownloadOperation& downloadOperation{ args.DownloadOperation() };
+      Internal::g_DownloadOperationHandles.push_back(downloadOperation); // Storing a reference to the download operation fixes the issue.
+      downloadOperation.StateChanged([](auto&&, auto&&) {
+        TRACE(_T("\n[Info] Working StateChanged event handler was called!\n")); // Does get executed!
+      });
+    });
 }
 
 void CWebView2Ctrl::ResizeToClientArea()

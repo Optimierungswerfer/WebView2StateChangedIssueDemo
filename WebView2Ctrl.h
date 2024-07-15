@@ -53,6 +53,9 @@ protected:
 private:
   winrt::fire_and_forget CreateWebView2ControllerAsync();
 
+  void RegisterDownloadOperationStateChangedEventHandler_BROKEN();
+  void RegisterDownloadOperationStateChangedEventHandler_WORKING();
+
   void ResizeToClientArea();
 
   // Window methods
